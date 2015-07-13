@@ -1,0 +1,41 @@
+﻿create table kaggle.eeg_test_subjects 
+(
+subject_num number,
+series_number number,
+frame_number number,
+Fp1 number,
+Fp2 number,
+F7  number,
+F3  number,
+Fz  number,
+F4  number,
+F8 number,
+FC5 number,
+FC1  number,
+FC2 number,
+FC6  number,
+T7 number,
+C3 number,
+Cz number,
+C4 number,
+T8 number,
+TP9 number,
+CP5 number,
+CP1 number,
+CP2 number,
+CP6 number,
+TP10 number,
+P7 number,
+P3 number,
+Pz number,
+P4 number,
+P8 number,
+PO9 number,
+O1 number,
+Oz number,
+O2 number,
+PO10 number
+
+
+
+)
