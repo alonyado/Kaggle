@@ -39,7 +39,7 @@ PO10 numeric
 );
 
 
-create table kaggle.subject_tagging_train
+create table kaggle.eeg_tagging_train
 (
 subject_num numeric,
 series_numeric numeric,
@@ -52,7 +52,7 @@ is_Replace boolean,
 is_BothReleased boolean
 );
 
-create table kaggle.subject_tagging_results
+create table kaggle.eeg_tagging_results
 (
 subject_num numeric,
 series_numeric numeric,
