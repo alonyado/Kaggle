@@ -1,6 +1,7 @@
 import os, socket
 import time, logging
 from KaggleDB import KaggleDB
+import csvAnalyzer
 
 def initLogging():
     if not(os.path.exists('log')):
@@ -15,8 +16,16 @@ def initLogging():
 def initDB():
     db = KaggleDB()
     #db.TruncateAll()
+    return db
 
-def loadTrainData(fpathDir):
-    if not(os.path.exists(fpathDir)):
+def loadRawData(fpath, is_test= False):
+    db = initDB()
+    if not(os.path.exists(fpath)):
         raise NameError('Path not exist')
+    print 'Loading File...'
+    subjCont = csvAnalyzer.analyzeFile(fpath)
+    print 'Done! Inserting To DB...'
+    db.InsertTrainSubject(subjCont, is_test)
+    print 'Done'
+    
     

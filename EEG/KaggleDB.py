@@ -56,7 +56,7 @@ order by ordinal_position
         return ls
 
     def InsertTrainSubject(self, subjectsProps, is_test = False):
-        tblFields = GetTableFields('eeg_subjects')
+        tblFields = self.GetTableFields('eeg_subjects')
         allRows = map(lambda x: self.__subjectToRow(tblFields, x, is_test), subjectsProps)
         flCnt = len(tblFields)
         sHeader = '%s,' * flCnt 
