@@ -30,7 +30,7 @@ def initDB():
     db = KaggleDB()
     return db
 
-def loadRawData(db, fpath, is_test= False):
+def loadData(fpath, dbFunc):
     if not(os.path.exists(fpath)):
         raise NameError('Path not exist')
     allDone = getAllDone()
@@ -40,25 +40,44 @@ def loadRawData(db, fpath, is_test= False):
     print 'Loading File "%s"...'%os.path.basename(fpath)
     subjCont = csvAnalyzer.analyzeFile(fpath)
     print 'Inserting To DB...'
-    succ = db.InsertRawData(subjCont, is_test)
+    succ = dbFunc(subjCont)
     if succ:
         logFile(fpath)
         print 'Done!'
     else:
         print 'Error, please see logs...'
-    
-def loadAllRaw(db, fDir, is_test=False):
+
+def loadRawData(db, fpath, is_test= False):
+    dbFunc = lambda x: db.InsertRawData(x, is_test)
+    loadData(fpath, dbFunc)
+
+def loadTagData(db, fpath):
+    dbFunc = lambda x: db.InsertTaggedData(x)
+    loadData(fpath, dbFunc)
+
+def loadAllData(fDir, filtF, func):
     if not(os.path.exists(fDir)):
         raise NameError('Path not exist')
     allFiles = os.listdir(fDir)
-    allFiles = filter(lambda f : f.endswith('_data.csv') , allFiles)
+    allFiles = filter(lambda f : filtF(f) , allFiles)
     for fil in allFiles:
         fullPath = os.path.join(fDir, fil)
-        loadRawData(db, fullPath, is_test)
+        func(fullPath)
+
+def loadAllRaw(db, fDir, is_test=False):
+    filtF = lambda f : f.endswith('_data.csv')
+    func = lambda x: loadRawData(db, x, is_test)
+    loadAllData(fDir, filtF, func)
+
+def loadAllTag(db, fDir):
+    filtF = lambda f : f.endswith('_events.csv')
+    func = lambda x: loadTagData(db, x)
+    loadAllData(fDir, filtF, func)
 
 initLogging()
 db = initDB()
 
-loadRawData(db,'/home/alonyado/Desktop/Kaggle/Data/EEG/train/subj1_series1_data.csv')
+loadRawData(db,'/home/alonyado/Desktop/Kaggle/Data/EEG/train/subj1_series2_data.csv')
 #loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')
 #loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/test', True)
+#loadAllTag(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')

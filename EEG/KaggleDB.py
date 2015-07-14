@@ -58,9 +58,28 @@ order by ordinal_position
                 ls.append(float(subProps[f]))
         return ls
 
+    def __subjectTagToRow(self, tblFields, subProps):
+        ls = list()
+        for f in tblFields:
+            ef = f
+            if f.startswith('is_'):
+                ef = f[3:]
+            if not(subProps.has_key(ef)):
+                raise NameError('Field Not Found - %s'%f)
+            ls.append(float(subProps[ef]))
+        return ls
+
     def InsertRawData(self, subjectsProps, is_test = False):
-        tblFields = self.GetTableFields('eeg_subjects')
-        allRows = map(lambda x: self.__subjectToRow(tblFields, x, is_test), subjectsProps)
+        transFunc = lambda tblF,x: self.__subjectToRow(tblF, x, is_test)
+        self.__insertData(subjectsProps, 'eeg_subjects', transFunc)
+    
+    def InsertTaggedData(self, subjectsProps):
+        transFunc = lambda tblF,x: self.__subjectTagToRow(tblF, x)
+        self.__insertData(subjectsProps, 'eeg_tagging_train', transFunc)    
+    
+    def __insertData(self, subjectsProps, table_name, transFunction):
+        tblFields = self.GetTableFields(table_name)
+        allRows = map(lambda x: transFunction(tblFields, x), subjectsProps)
         flCnt = len(tblFields)
         sHeader = '%s,' * flCnt 
         sHeader = sHeader[0:-1]
@@ -68,8 +87,8 @@ order by ordinal_position
             raise NameError('Connection already closed')
         try:
             self.__cur = self.__conn.cursor()
-            self.__cur.executemany("""insert into kaggle.eeg_subjects values(%s)
-                                ;"""%sHeader,
+            self.__cur.executemany("""insert into kaggle.%s values(%s)
+                                ;"""%(table_name ,sHeader),
                                allRows)
             self.__cur.close()
             self.__conn.commit()
