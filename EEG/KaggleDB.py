@@ -62,20 +62,25 @@ order by ordinal_position
         ls = list()
         for f in tblFields:
             ef = f
+            castToBool = False
             if f.startswith('is_'):
                 ef = f[3:]
+                castToBool = True
             if not(subProps.has_key(ef)):
                 raise NameError('Field Not Found - %s'%f)
-            ls.append(float(subProps[ef]))
+            if not(castToBool):
+                ls.append(float(subProps[ef]))
+            else:
+                ls.append(float(subProps[ef]) > 0)
         return ls
 
     def InsertRawData(self, subjectsProps, is_test = False):
         transFunc = lambda tblF,x: self.__subjectToRow(tblF, x, is_test)
-        self.__insertData(subjectsProps, 'eeg_subjects', transFunc)
+        return self.__insertData(subjectsProps, 'eeg_subjects', transFunc)
     
     def InsertTaggedData(self, subjectsProps):
         transFunc = lambda tblF,x: self.__subjectTagToRow(tblF, x)
-        self.__insertData(subjectsProps, 'eeg_tagging_train', transFunc)    
+        return self.__insertData(subjectsProps, 'eeg_tagging_train', transFunc)    
     
     def __insertData(self, subjectsProps, table_name, transFunction):
         tblFields = self.GetTableFields(table_name)
@@ -94,6 +99,7 @@ order by ordinal_position
             self.__conn.commit()
             return True
         except:
+            #traceback.print_exc()
             self.__logger.error(traceback.format_exc())
             self.__errorCount = self.__errorCount + 1
             if (self.__errorCount >= self.__maxError):

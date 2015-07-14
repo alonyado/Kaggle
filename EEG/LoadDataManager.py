@@ -77,7 +77,11 @@ def loadAllTag(db, fDir):
 initLogging()
 db = initDB()
 
-loadRawData(db,'/home/alonyado/Desktop/Kaggle/Data/EEG/train/subj1_series2_data.csv')
-#loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')
-#loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/test', True)
-#loadAllTag(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')
+#Debug
+#loadRawData(db,'/home/alonyado/Desktop/Kaggle/Data/EEG/train/subj1_series1_data.csv')
+#loadTagData(db,'/home/alonyado/Desktop/Kaggle/Data/EEG/train/subj1_series1_events.csv')
+
+loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')
+loadAllRaw(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/test', True)
+loadAllTag(db, '/home/alonyado/Desktop/Kaggle/Data/EEG/train')
+db.close()
