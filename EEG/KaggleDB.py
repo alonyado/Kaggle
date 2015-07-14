@@ -8,6 +8,9 @@ class KaggleDB:
         self.__maxError = maxErrorToRest
         self.__logger = logging.getLogger(__name__)
 
+    def close(self):
+        self.__conn.close()
+
     def GetTableFields(self, tbl_name = 'eeg_subjects'):
         #fields = ['subject_num','series_numeric','frame_numeric', \
         #'is_test','fp1','fp2','f7','f3','fz','f4','f8','fc5','fc1',\
@@ -55,7 +58,7 @@ order by ordinal_position
                 ls.append(float(subProps[f]))
         return ls
 
-    def InsertTrainSubject(self, subjectsProps, is_test = False):
+    def InsertRawData(self, subjectsProps, is_test = False):
         tblFields = self.GetTableFields('eeg_subjects')
         allRows = map(lambda x: self.__subjectToRow(tblFields, x, is_test), subjectsProps)
         flCnt = len(tblFields)
@@ -70,6 +73,7 @@ order by ordinal_position
                                allRows)
             self.__cur.close()
             self.__conn.commit()
+            return True
         except:
             self.__logger.error(traceback.format_exc())
             self.__errorCount = self.__errorCount + 1
@@ -80,25 +84,4 @@ order by ordinal_position
                 except:
                     self.__logger.error(traceback.format_exc())
                 self.__conn = psycopg2.connect("dbname=postgres user=postgres")
-
-    def TruncateAll(self):
-        if (self.__conn == None):
-            raise NameError('Connection already closed')
-        try:
-            self.__cur = self.__conn.cursor()
-            self.__cur.execut("""truncate table kaggle.eeg_subjects;
-            truncate table kaggle.eeg_tagging_train;
-                                """
-                               )
-            self.__cur.close()
-            self.__conn.commit()
-        except:
-            self.__logger.error(traceback.format_exc())
-            self.__errorCount = self.__errorCount + 1
-            if (self.__errorCount >= self.__maxError):
-                self.__errorCount = 0
-                try:
-                    self.__conn.close()
-                except:
-                    self.__logger.error(traceback.format_exc())
-                self.__conn = psycopg2.connect("dbname=postgres user=postgres")
+            return False
