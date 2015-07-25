@@ -1,0 +1,6 @@
+We can see how beuty is the FFT on the data :)
+
+We Can see the strong corrolation in subject 3 feature number 6 (ft4). the kld measure is low
+and the kld measure between before moving hand part to moving hand part is large more then 1.6
+
+need to automate this script - with good mesurments!
