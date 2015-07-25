@@ -15,6 +15,20 @@ for i=3:size(data,2)-1
     fp_v = [fp_v ; fp];
 end
 goal_val = [data{:,end}];
+%% plot fft twice
+[kl_d, mkld, mkld2, sm_f, sm_t] = exploreFFT(s_id, fp_v, 6);
+
+av_t = sum(sm_t);
+av_t = av_t(1:round(length(av_t)/2));
+
+av_f = sum(sm_f);
+av_f = av_f(1:round(length(av_f)/2));
+
+plotFFT( av_f);
+hold on
+y=plotFFT( av_t);
+plot( round(0.05 * length(av_t)):length(y)+ round(0.05 * length(av_t))-1 ,y, 'r');
+
 
 %%
 % 6
