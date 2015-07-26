@@ -1,4 +1,4 @@
-function [kl_d, maxD,maxD2]=exploreFFT(s_id, fp_v, feat_num)
+function [kl_d, maxD,maxD2, smp_falses, smp_true]=exploreFFT(s_id, fp_v, feat_num)
 
 if ~exist('feat_num', 'var')
     feat_num = 6;
