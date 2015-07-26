@@ -1,15 +1,21 @@
-function [y]=plotFFT(x)
+function [y, st]=plotFFT(x)
 
 printRes = true;
 if nargout >0
     printRes = false;
 end
 
-st = round(0.05 * length(x));
+mltFactor = 5;
+stFactor = 0.1;
 
-y = fft(x, length(x) * 5 );
+
+
+y = fft(x, length(x) * mltFactor );
 y = abs(y);
+
+st = round(stFactor * length(y));
 y = y(st:round(length(y)/2));
+
 if printRes
 %     figure;
     plot( st:length(y)+st-1 ,y);

@@ -9,7 +9,7 @@ if nargout > 0
     prtRes = false;
 end
 
-fs = 100; %each 100 ms
+fs = 150; %each 100 ms
 multFactor = 5;
 st = 50; % start from
 

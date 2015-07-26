@@ -24,11 +24,17 @@ av_t = av_t(1:round(length(av_t)/2));
 av_f = sum(sm_f);
 av_f = av_f(1:round(length(av_f)/2));
 
+falses_arr = plotFFT( av_f);
+[true_arr, st] = plotFFT( av_t);
+
 plotFFT( av_f);
 hold on
-y=plotFFT( av_t);
-plot( round(0.05 * length(av_t)):length(y)+ round(0.05 * length(av_t))-1 ,y, 'r');
+plot( st:length(true_arr)+ ...
+    st-1 ,true_arr, 'r');
 
+fPeak = st+GetPeak(falses_arr);
+tPeak = st+GetPeak(true_arr);
+fprintf('falsePaek = %d, truePeak=%d\n', round(fPeak), round(tPeak));
 
 %%
 % 6
