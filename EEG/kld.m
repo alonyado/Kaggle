@@ -1,5 +1,6 @@
 function res = kld(x1,x2)
 x1 =x1 / sum(x1);
+% x2 =x2 / sum(x1);
 
 res = zeros(1,size(x2,1));
 for i=1:size(x2,1)
