@@ -10,7 +10,7 @@ for i = 1:length(goodInd)
     newVec(minIndex:maxIndex) = 1;
 end
 
-[~, sectionsInd, endInd] = Helper.CompleteSeries(newVec, 1);
+[~, sectionsInd, endInd] = Hlp.CompleteSeries(newVec, 1);
 
 end
 

@@ -27,7 +27,7 @@ valVectorEdit = valVector;
 
 [maxValue, ~] = max(valVector);
 toRemove = valVectorEdit >= maxValue * fromMaxPerc;
-[toRemove, ss, ~] = Helper.WrapSeries(toRemove , wrapSz); % wraps the maximum zone
+[toRemove, ss, ~] = Hlp.WrapSeries(toRemove , wrapSz); % wraps the maximum zone
 valVectorEdit(toRemove) = -Inf;
 diffAreas = length(ss);
 if (diffAreas > 1)
