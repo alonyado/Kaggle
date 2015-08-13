@@ -64,7 +64,7 @@ while removeAgain
     if removeAgain
         [mTempVal, ~ ] =  max(valVectorEdit);
         toRemove = valVectorEdit>=mTempVal*fromMaxPerc;
-        [~, s, e] = Helper.WrapSeries( toRemove , wrapSz);
+        [~, s, e] = Hlp.WrapSeries( toRemove , wrapSz);
 %         numS = length(s);
         removeAgain = mTempVal > 0;
     end;
