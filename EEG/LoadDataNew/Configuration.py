@@ -9,8 +9,8 @@ class Configuration:
         # next time it starts, its skips the already success files uploaded
         
         self.filesFormatFunc = lambda f : f.endswith('test.csv') #files filter to upload to that table, you can use regex also
-        self.dataAnalyzerFun = lambda f:  csvAnalyzer.analyzeFile(f, delimiter = ',', \ #delimeter fot csv
-                                                                  manipulationFunc = None, \ #dictionary for functions to manipulate fields in the csv. example 1
+        self.dataAnalyzerFun = lambda f:  csvAnalyzer.analyzeFile(f, delimiter = ',', #delimeter fot csv
+                                                                  manipulationFunc = None, #dictionary for functions to manipulate fields in the csv. example 1
                                                                   additionalConstFields = None) #additionalFields to add for table
         
         # Example 1: manipulation function for fields:
