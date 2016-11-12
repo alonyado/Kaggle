@@ -114,7 +114,6 @@ class DataLoader:
         print 'Finished!'
 
     def __loadDataFile(self, fpath, fieldTypes):
-        dbFunc = lambda x, transFunc: self.__db.loadData(self.cfg.tableName , x, transFunc)
         analyzeFun = self.cfg.dataAnalyzerFun
         
         if not(os.path.exists(fpath)):
@@ -129,7 +128,7 @@ class DataLoader:
             return
         print 'Inserting To DB...'
         convFunc = lambda allFields, rowDict:  map(lambda kvFieldType: self.__convertToType( rowDict[kvFieldType[0]], kvFieldType[1], kvFieldType[0] ) , fieldTypes)
-        succ = dbFunc(data, convFunc)
+        succ = self.__db.loadData(self.cfg.tableName, data, convFunc)
         if succ:
             self.__logFile(fpath)
             print 'Done!'
@@ -146,7 +145,6 @@ class DataLoader:
         return allFiles
 
     def loadAllData(self):
-        func = lambda x: self.__loadDataFile(x, self.__dataH)
         filtF = self.cfg.filesFormatFunc
         fDir = self.cfg.dataDir
         
@@ -156,7 +154,7 @@ class DataLoader:
         allFiles = filter(lambda f : filtF(f) , allFiles)
         for fil in allFiles:
             fullPath = os.path.join(fDir, fil)
-            func(fullPath)
+            self.__loadDataFile(fullPath, self.__dataH)
 
     def close(self):
         if self.__db <> None:
