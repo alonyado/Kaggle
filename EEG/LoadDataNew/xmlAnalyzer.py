@@ -1,6 +1,7 @@
 from xml.dom import minidom
 import os
 
+#TODO: more generic - this is just an example of how to write code for analyze xml. it's not a generic code
 def parseXml(fPath):
     fid = open(fPath)
     strText = fid.read().replace('&', '&amp;').strip()
