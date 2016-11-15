@@ -27,20 +27,28 @@ def splitLine(line, delimiter, supportQ = True):
 
     return tokens
             
-def analyzeCsv(csvContent, delimiter = ',', supportQ = True, manipulationFunc = None, additionalConstFields = None):
+def analyzeCsv(csvContent, delimiter = ',', supportQ = True, manipulationFunc = None, additionalConstFields = None, header = None):
     if manipulationFunc <> None and type(manipulationFunc) <> dict:
         raise NameError('passed manipulationFunc which should be dict object')
-    if additionalConstFields <> None and type(manipulationFunc) <> dict:
+    if additionalConstFields <> None and type(additionalConstFields) <> dict:
         raise NameError('passed additionalConstFields which should be dict object')
     res = list()
     
     allLines = csvContent.splitlines()
     allLines = filter(lambda x: len(x.strip()) > 0, allLines)
-    header = allLines[0]
-    header = map(lambda x: x.strip().strip('"').lower() ,header.split(delimiter))
-    
-    fieldCnt = len(header)
-    allLines = allLines[1:len(allLines)]    
+
+    addFieldsCnt = 0
+    if header is None:
+        header = allLines[0]
+        header = map(lambda x: x.strip().strip('"').lower() ,header.split(delimiter))
+        allLines = allLines[1:len(allLines)]
+        if additionalConstFields <> None:
+            for exF, exV in additionalConstFields.iteritems():
+                header.append(exF)
+    if additionalConstFields <> None:
+        addFieldsCnt = len(additionalConstFields)
+                
+    fieldCnt = len(header) - addFieldsCnt
 
     lineNum = 1
     for line in allLines:
@@ -49,8 +57,12 @@ def analyzeCsv(csvContent, delimiter = ',', supportQ = True, manipulationFunc = 
         allTokens = map(lambda t: t.strip().strip('"') ,allTokens)
         d = dict()
         if len(allTokens) <> fieldCnt:
-            sys.stderr.write('%s\n'%line)
-            raise NameError('Csv Format Exception in line %d'%lineNum)
+            #FILE FORMAT
+            if len(allTokens) < fieldCnt:
+                sys.stderr.write('%s\n'%line)
+                raise NameError('Csv Format Exception in line %d excpected for %d tokens'%(lineNum, fieldCnt))
+            allTokens[fieldCnt-1] = delimiter.join(allTokens[fieldCnt-1:])
+            allTokens = allTokens[:fieldCnt]
             
         for i in xrange(0, fieldCnt):
             if len(header[i]) == 0:
@@ -65,7 +77,7 @@ def analyzeCsv(csvContent, delimiter = ',', supportQ = True, manipulationFunc = 
                 d[exF] = exV
         res.append(d)
         
-    header = filter(lambda x: len(x) > 0 ,header)    
+    header = filter(lambda x: len(x) > 0 ,header)
     return res, header
 
 def analyzeFile(fpath, delimiter = ',', supportQ = True, manipulationFunc = None, additionalConstFields = None):
@@ -75,3 +87,36 @@ def analyzeFile(fpath, delimiter = ',', supportQ = True, manipulationFunc = None
     data = f.read()
     f.close()
     return analyzeCsv(data, delimiter, supportQ, manipulationFunc, additionalConstFields)
+
+def analyzeFileTop(fpath, delimiter = ',', topN=1000 ,supportQ = True, manipulationFunc = None, additionalConstFields = None):
+    if not(os.path.exists(fpath)):
+        raise NameError('Path not exist')
+    f = open(fpath, 'r')
+    data = ''
+    for i in xrange(topN):
+        line = f.readline()
+        if line is None or len(line) == 0:
+            break
+        data = data + line
+    f.close()
+    return analyzeCsv(data, delimiter, supportQ, manipulationFunc, additionalConstFields)
+
+def analyzeFileLazy(f_or_path, delimiter = ',', topN=1000 ,supportQ = True, manipulationFunc = None, additionalConstFields = None, header = None):
+    if type(f_or_path) == str: #first time, f is string path
+        if not(os.path.exists(f_or_path)):
+            raise NameError('Path not exist')
+        f = open(f_or_path, 'r')
+    else:
+        f = f_or_path
+        if f.closed:
+            res = [None, None]
+            return f, res
+    
+    data = ''
+    for i in xrange(topN):
+        line = f.readline()
+        if line is None or len(line) == 0:
+            f.close()
+            break
+        data = data + line
+    return f, analyzeCsv(data, delimiter, supportQ, manipulationFunc, additionalConstFields, header)

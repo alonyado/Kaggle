@@ -62,6 +62,8 @@ class DataLoader:
                 else:
                     res= bool(rawData)
             elif fieldType == 'string':
+                if type(rawData) == file:
+                    rawData = rawData.name
                 if rawData==None or len(rawData) == 0:
                     res = None
                 else:
@@ -85,7 +87,9 @@ class DataLoader:
         exampleFile = allFiles[0]
         fullPath = os.path.join(folderPath, exampleFile)
         #[data, headers] = analyzerFun(fullPath, self.cfg.csv_delimeter, self.cfg.csv_transFunc, self.cfg.csv_additionalDict)
-        [data, headers] = analyzerFun(fullPath)
+        [tmp, fileOut] = analyzerFun(fullPath, None)
+        data = fileOut[0]
+        headers = fileOut[1]
         #if len(data) == 0:
         #    raise NameError('data file is empty')
         
@@ -107,14 +111,17 @@ class DataLoader:
         self.__db = KaggleDB(self.cfg.schema_name)
         
         print 'Analyzing Data...'
-        self.__dataH = self.__prepareDataType(self.cfg.dataDir, self.cfg.filesFormatFunc, self.cfg.dataAnalyzerFun)
+        self.__dataH = self.__prepareDataType(self.cfg.dataDir, self.cfg.filesFormatFunc, self.cfg.dataAnalyzerFunLazy)
         
         print 'Createing Schema'
         self.__db.createSchema(self.cfg.tableName , self.__dataH)
         print 'Finished!'
 
-    def __loadDataFile(self, fpath, fieldTypes):
-        analyzeFun = self.cfg.dataAnalyzerFun
+    #TODO: load in parallel
+    def __loadDataFile(self, fpath):
+        convFunc = lambda allFields, rowDict:  map(lambda kvFieldType: self.__convertToType( rowDict[kvFieldType[0]], kvFieldType[1], kvFieldType[0] ) , self.__dataH)
+        dbFunc = lambda x: self.__db.loadData(self.cfg.tableName , x, convFunc, self.cfg.upload_bulk_size)
+        analyzeFun = self.cfg.dataAnalyzerFunLazy
         
         if not(os.path.exists(fpath)):
             raise NameError('Path not exist')
@@ -122,13 +129,22 @@ class DataLoader:
         if allDone.count(fpath):
             print 'Already Done!'
             return
+        
+        headers = None
         print 'Loading File "%s"...'%os.path.basename(fpath)
-        [data, headers] = analyzeFun(fpath)
-        if data == None:
-            return
-        print 'Inserting To DB...'
-        convFunc = lambda allFields, rowDict:  map(lambda kvFieldType: self.__convertToType( rowDict[kvFieldType[0]], kvFieldType[1], kvFieldType[0] ) , fieldTypes)
-        succ = self.__db.loadData(self.cfg.tableName, data, convFunc)
+
+        f = fpath
+        while True:
+            [f, fileOut] = analyzeFun(f, headers)
+            data = fileOut[0]
+            headers = fileOut[1]
+            if data == None:
+                break
+            #print 'Inserting To DB...'
+            succ = dbFunc(data)
+            if not(succ):
+                break
+            
         if succ:
             self.__logFile(fpath)
             print 'Done!'
@@ -145,6 +161,7 @@ class DataLoader:
         return allFiles
 
     def loadAllData(self):
+        func = lambda x: self.__loadDataFile(x)
         filtF = self.cfg.filesFormatFunc
         fDir = self.cfg.dataDir
         
@@ -154,7 +171,7 @@ class DataLoader:
         allFiles = filter(lambda f : filtF(f) , allFiles)
         for fil in allFiles:
             fullPath = os.path.join(fDir, fil)
-            self.__loadDataFile(fullPath, self.__dataH)
+            func(fullPath)
 
     def close(self):
         if self.__db <> None:
@@ -167,4 +184,3 @@ if __name__ == '__main__':
     dl.loadAllData()
 
     dl.close()
-
